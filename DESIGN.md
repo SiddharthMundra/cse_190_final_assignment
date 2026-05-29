@@ -1,74 +1,34 @@
-# Design decisions
-
-This document records **three** places where a product or engineering choice shaped **Unfold**. For each case: what we chose, why it matters, and a **reflection on authorship**—how much the decision feels like my judgment versus help from an agentic coding tool (Cursor).
+# Design decisions — Unfold
 
 ---
 
-## 1. Extract PDF and text in the browser (client-side)
+## 1. Parse documents in the browser, not on the server
 
-### Decision
+When someone uploads a PDF or `.txt`, the text gets pulled out in the browser with PDF.js (for PDFs) or a normal file read (for text). The server never sees the original file—only the string that comes out of extraction, when the user hits analyze or asks a chat question.
 
-Document text is extracted **entirely in the browser**: plain text files via the File API, and PDFs via **PDF.js** (`pdfjs-dist`) with a bundled worker. Only the resulting string is sent to the backend for LLM analysis—not the original file upload as a separate storage pipeline.
+I carried this over from Assignment 2 on purpose. I wanted users to feel like parsing happens on their machine first, and that we're not storing a copy of every PDF on our server just because they opened the site. It also kept the backend small: Express just takes JSON, calls the model, and returns JSON. No file upload endpoint, no server-side PDF library, no object storage bill on Render's free tier.
 
-### Rationale
+I did think about server-side parsing because some PDFs come out garbled in the browser, and about sending the file to a third-party extractor. I stuck with client-side for this class project because the privacy story mattered more to me than perfect extraction on weird scans.
 
-- **Privacy and trust**: Users can see that parsing happens locally before any network call for analysis; the mental model is "text leaves the browser for the model," not "my file is uploaded to your server."
-- **Simpler server**: The API stays a thin JSON-in / JSON-out service (no file parsers, no virus surface from arbitrary binaries on the server for this prototype).
-- **Cost and hosting**: No object storage or PDF worker on the server for homework-scale deployment.
-
-### Alternatives considered
-
-- Server-side PDF parsing (more consistent for complex PDFs; heavier ops and trust model).
-- Sending raw PDF bytes to a third-party extractor API (another vendor and data path).
-
-### Authorship reflection
-
-Client-side extraction was my call from Assignment 2 — I did not want raw PDFs on the server for a privacy story. Cursor suggested PDF.js specifically; I kept that because it already worked in A2. I wrote the progress callback and error messages in `extractText.ts` myself after testing a few bad PDFs. Rough split: **~75% my intent / ~25% tool implementation** (worker setup, imports).
+**Authorship:** The "extract locally" idea was mine before I touched Cursor. The tool helped wire up `pdfjs-dist` and the worker import in `extractText.ts`; I spent time on the progress bar and error messages after a couple of uploads failed silently. I'd say most of the product intent was mine, and maybe a quarter of the actual code was generated and then edited by me.
 
 ---
 
-## 2. Structured JSON from the model + a normalization layer in the UI
+## 2. Ask the model for JSON, then clean it up in the UI
 
-### Decision
+The analyze endpoint tells the LLM to return one JSON object: summary, a list of sections (each clause explained in plain English), risks, and open questions. The chat endpoint does the same kind of thing—answer, optional quotes, and a flag when the doc doesn't really support the answer.
 
-The backend asks the LLM for **JSON only** (system prompt + `response_format: json_object` where supported), defining a schema: `plain_summary`, `sections[]`, `risks[]`, `open_questions[]`, etc. The React app then runs **`normalizeAnalysis`** so older or slightly malformed model output still maps into typed `Analysis` objects before rendering.
+I didn't want the main screen to be a wall of markdown that changes shape every run. `ResultsView` needs stable fields so History and the PDF download look the same every time. So the server checks "is this valid JSON?" and the client runs `normalizeAnalysis` to fill in missing pieces or fix slightly wrong shapes when the model gets lazy (which happened on my fake lease PDFs more than once).
 
-### Rationale
+The other option was to let the model write free-form prose and parse it later. That felt faster to build for one afternoon and painful for the rest of the quarter.
 
-- **Predictable UI**: `ResultsView` can rely on lists and fields instead of parsing free-form markdown or prose from the model.
-- **Easier iteration**: Prompt and schema can evolve; normalization absorbs minor inconsistencies without crashing the page.
-- **Separation of concerns**: The server validates "is this JSON?"; the client makes the UI resilient to schema drift.
-
-### Alternatives considered
-
-- Markdown or prose-only answers (faster to prompt, harder to build a consistent layout and history export).
-- Strict server-side schema validation only (rejects more often; pushes complexity to error handling for users).
-
-### Authorship reflection
-
-I defined the analysis shape (summary, per-clause sections, risks, open questions) before asking the agent to scaffold types and `ResultsView`. I edited the system prompt in `server/index.js` by hand — especially the "not legal advice" and section-splitting rules. Normalization came after the model returned missing fields on real leases; the agent wrote `analysisNormalize.ts`, but I decided which fields were required vs optional. **~60% my product/prompt choices / ~40% tool code**.
+**Authorship:** I decided what fields the UI needed—summary, per-section breakdown, risks, questions—before I asked the agent to scaffold types and components. I rewrote big chunks of the system prompt in `server/index.js`, especially the "this is not legal advice" language and the rule to split numbered clauses into separate sections. Cursor wrote most of `analysisNormalize.ts` after I showed it examples of broken output; I chose what to treat as optional vs required. Roughly half and half on product/prompt vs generated code, leaning toward my side on anything user-facing.
 
 ---
 
-## 3. Google sign-in + per-user Firestore, with localStorage fallback and migration
+## 3. Google login, Firestore per user, localStorage as a backup
 
-### Decision
+You have to sign in with Google to use the hosted app. Saves go under `users/{your uid}/runs/...` in Firestore, and the security rules only let you read and write your own subtree. If Firestore isn't configured but you're signed in, the app can still stash runs in `localStorage`; the first time cloud save works, those local runs get copied up and cleared locally.
 
-Access is gated by **Firebase Authentication (Google)**. Saved analyses live under **`users/{uid}/runs/{runId}`** in **Cloud Firestore**, with **security rules** so each user can only read/write their own subtree. If Firestore is not available but the user is signed in, the app can fall back to **`localStorage`**; on first cloud availability, **local runs migrate** in a batch and local copies are cleared.
+Firebase was in my proposal from the start—I picked the "ship with auth + live URL" track and didn't want to build login myself. Google-only was a time call, not a deep product decision. The History page (list of past docs, open one again, delete, download PDF) is layout I cared about; a lot of the React in `App.tsx` and `useRuns.ts` came from Cursor and I tweaked it. After staff feedback on privacy I made sure delete actually removes a run and that the rules file says other users can't see your data. I was also honest in the About page that someone with Firebase console access could technically look at stored docs—that's true and pretending otherwise felt wrong.
 
-### Rationale
-
-- **Accounts without custom backend auth**: Firebase handles identity; Firestore gives a managed document store with real-time updates for History.
-- **Safety**: Rules encode "only my data" in one place; no ad hoc checks in every client call for a prototype.
-- **Continuity**: Fallback + migration avoid losing work when moving from offline or misconfigured Firestore to a working project.
-
-### Alternatives considered
-
-- Session-only, no save (simpler; worse for returning users).
-- Custom JWT + your own database (more control; more homework scope).
-
-### Authorship reflection
-
-Firebase was in my original proposal ("Ship with auth + live URL"), not a course default. I chose Google sign-in only to ship faster. History UX (list, reopen, Remove, PDF download) I sketched; Cursor generated most of the React structure in `App.tsx` and `useRuns.ts`. I insisted on Firestore rules and user-initiated delete after staff privacy feedback. **~55% my requirements and review / ~45% tool scaffolding**.
-
----
