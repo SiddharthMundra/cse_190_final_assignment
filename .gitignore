@@ -1,0 +1,12 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+node_modules/
+
+# Backend runtime data — never commit user docs or extractions
+backend/storage/db.json
+backend/storage/eval-db.json
+backend/storage/files/

@@ -1,0 +1,35 @@
+# Render Blueprint — one Web Service serves the React app and Express API.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: unfold
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRITON_BASE_URL
+        sync: false
+      - key: TRITON_API_KEY
+        sync: false
+      - key: TRITON_MODEL
+        sync: false
+      - key: VITE_FIREBASE_API_KEY
+        sync: false
+      - key: VITE_FIREBASE_AUTH_DOMAIN
+        sync: false
+      - key: VITE_FIREBASE_PROJECT_ID
+        sync: false
+      - key: VITE_FIREBASE_STORAGE_BUCKET
+        sync: false
+      - key: VITE_FIREBASE_MESSAGING_SENDER_ID
+        sync: false
+      - key: VITE_FIREBASE_APP_ID
+        sync: false
+      - key: ANALYZE_DAILY_LIMIT
+        value: "25"
+      - key: CHAT_DAILY_LIMIT
+        value: "80"

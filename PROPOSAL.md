@@ -57,6 +57,30 @@ User can reopen a past document analysis and continue or review the document cha
 The backend checks user identity and limits requests per user so public users cannot spam the LLM API.
 
 
+# Privacy & data handling (first deliverable)
+
+### Legal advice
+**No.** Unfold is an informational reading aid for a course project. It explains uploaded text; it does not tell users what they should do legally, whether to sign, or how to litigate. The UI and README state this clearly.
+
+### What we store
+- Extracted text is processed in the browser; **paragraph chunks**, **analysis JSON**, and **chat messages** are saved in **Firestore** under the signed-in user’s Firebase UID.
+- Excerpts are sent to **TritonGPT** only when the user runs analyze or chat (with per-user daily limits on the API).
+
+### Deletion & access
+- Users can **delete** a saved document (analysis, chunks, and chat) from the **History** page.
+- **Other users** cannot read your data (Firestore rules: `request.auth.uid == userId`).
+- **Course staff / Firebase admins** could access console data for grading or debugging; routine reading of user contracts is not intended. This is a **student demo**, not a production legal datastore.
+
+### Risks of central storage
+Storing contracts centrally creates privacy and legal-discovery risk at scale. Mitigations for this project: per-user isolation, user-initiated delete, no public sharing of uploads, no training on user documents, and clear notices not to upload unauthorized material.
+
+### How “relevant” chunks are defined (v1)
+1. **Chunking:** Split extracted text on **paragraph boundaries** (blank lines), with a max character cap per chunk.
+2. **Scoring:** Rank chunks by **lexical overlap** — shared terms between the user’s question and chunk text (stopwords removed).
+3. **Top-k:** Send the top **3–5** chunks plus recent chat history to TritonGPT with instructions to answer **only from those excerpts** and flag when the answer is unclear.
+4. **Later (optional):** Embedding-based semantic search if time allows.
+
+
 # After First Deliverable Goals
 
 - Add multi-document comparison, such as comparing a lease with a pet policy or HOA rules.
