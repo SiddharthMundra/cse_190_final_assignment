@@ -1,90 +1,75 @@
-# Transcript 2 — A4 initial submission deliverables
+# Agent Transcript 2 — A4 initial submission package
 
-**Tool:** Cursor (agent chat)  
-**Chat ID:** `8eef32e9-5ef0-4b6e-9304-59288636dba8`  
-**Topic:** DESIGN.md, proposal/, DEMO.md, marked proposal, transcript scaffolds  
-**Author:** Siddharth Mundra
+| Field | Value |
+|-------|--------|
+| **Course** | CSE 190 — Generative AI Programming (SP26) |
+| **Project** | Unfold — AI legal document assistant |
+| **Tool** | Cursor (Composer agent) |
+| **Chat ID** | `8eef32e9-5ef0-4b6e-9304-59288636dba8` |
+| **Author** | Siddharth Mundra |
 
-> Exported from Cursor agent transcripts. Tool-only steps are omitted.
+**Purpose of this session:** Assemble required initial-submission documents (proposal folder, marked proposal, DEMO.md, transcripts, DESIGN.md, README) and align them with the live deployment.
 
 ---
 
-## Turn 1 — User
+## Turn 1
 
-Along with your implementation, include the standard set of documents plus two more:
+### My prompt
 
-3 transcripts
-DESIGN.md
-README.md
-YouTube video
-(new) proposal/
-(new) DEMO.md
-proposal/ should include:
+For my initial submission I need to include the standard documents plus:
 
-Your original proposal
-A document that is a “marked up” copy of your proposal. It should be the same format as your original (e.g. PDF if you submitted PDF, markdown if you submitted markdown), where for each item in your proposal, you indicate if it's (a) implemented as written/in-use as written, in which case you say where in the code that is, (b) planned to be implemented, in which case you should say where it will fit in, (c) no longer planned. The items you should report on are:
-Planned technologies
-First deliverable
-Rough architecture for first deliverable
-After first deliverable goals
-DEMO.md should include ONE of:
+- 3 agent transcripts  
+- `DESIGN.md`  
+- `README.md`  
+- YouTube demo video  
+- **`proposal/`** — original proposal + a **marked-up** copy (same format as original). For each item, mark: **(a)** implemented as written (with code locations), **(b)** planned, or **(c)** no longer planned. Report on: planned technologies, first deliverable, rough architecture, after-first-deliverable goals.  
+- **`DEMO.md`** — either live-demo access instructions **or** build-from-scratch (Linux/WSL-friendly; no Windows/Mac-only steps).
 
-Instructions for accessing a live demo/install of your tool (e.g. visit this URL, download this Github repo, etc)
-Instructions for building the tool from scratch
-Please do not give Windows- or Mac-specific instructions. Assume that folks can get WSL or general Linuxy setups to work. You won't be strictly graded on your tool being able to run/install/build on someone else's machine (and given the nature of some of the projects, it's hard to expect someone else to always be able to do it), but please make an effort.
+Please set this up for my initial submission. My live site is:
 
-can you do this for my intiial submissio? my website link is https://unifold-ai.onrender.com
+**https://unifold-ai.onrender.com**
 
-## Turn 1 — Assistant
+### Agent response
 
-Exploring the project and any existing proposal or documentation so we can create the required deliverables.
+The agent explored the repo and prior chats, then created the submission package.
 
-*(continued)*
-
-Reading agent transcripts to produce submission documents.
-
-*(continued)*
-
-Creating the submission documents: proposal folder, marked proposal, DEMO.md, transcripts, and README/DESIGN updates.
-
-*(continued)*
-
-I've set up your **A4 initial submission** package. Here's what's in the repo now:
-
-## Created / updated
+#### Files created or updated
 
 | Requirement | Location |
 |-------------|----------|
-| **proposal/** (original) | `proposal/PROPOSAL.md` |
-| **proposal/** (marked up) | `proposal/PROPOSAL_MARKED.md` |
-| **DEMO.md** | Live demo at https://unifold-ai.onrender.com |
-| **3 transcripts** | `transcripts/transcript-1-proposal-privacy-feedback.md`, `transcript-2-implementing-chat-and-core-features.md`, `transcript-3-deploy-and-pdf-export.md` |
-| **DESIGN.md** | Authorship reflections filled in |
-| **README.md** | Live demo link + submission docs index |
+| Original proposal | `proposal/PROPOSAL.md` |
+| Marked proposal | `proposal/PROPOSAL_MARKED.md` |
+| Live demo | `DEMO.md` → https://unifold-ai.onrender.com |
+| Transcripts (×3) | `transcripts/transcript-1-…`, `transcript-2-…`, `transcript-3-…` |
+| Design + authorship | `DESIGN.md` |
+| Index + setup | `README.md` |
 
-## Marked proposal summary
+#### Marked proposal summary (agent assessment)
 
-Your **first deliverable is largely complete (a)**:
+**Mostly implemented (a) for first deliverable:**
 
-- All planned technologies are in use (React/Vite, Express, Firebase, TritonGPT, Render, PDF.js)
-- Document chat pipeline: chunk → keyword relevance → grounded answers
-- Privacy items from Joe's feedback: disclaimers, Firestore rules, History delete, lexical top-k
+- React/Vite, Express, Firebase (Google + Firestore), TritonGPT, Render, PDF.js  
+- Document chat: chunk → keyword relevance → grounded answers  
+- Privacy items from staff feedback: disclaimers, Firestore rules, History delete, lexical top-k in `server/relevance.js`  
+- Rate limiting in `server/rateLimit.js`
 
-**Still planned (b)** for after the first deliverable:
+**Still planned (b) after first deliverable:**
 
-- Multi-document comparison
-- History search/filter
-- Streaming chat responses
-- Embedding-based semantic search (optional upgrade to `server/relevance.js`)
+- Multi-document comparison  
+- History search/filter  
+- Streaming chat responses  
+- Optional embedding-based semantic search
 
-**Moved into first deliverable (a):** server validation + rate limiting (`server/rateLimit.js`)
+#### Remaining tasks (for me)
 
-## What you still need to do
-
-1. **YouTube demo video** — README still has a placeholder. Record a short walkthrough (sign in → upload → analyze → chat → History) and replace the URL in `README.md`.
-2. **Review DESIGN.md** — Authorship percentages are drafted in your voice; tweak if they don't match how you actually used Cursor.
-3. **Push to GitHub** before Gradescope submit so reviewers can clone the repo linked in `DEMO.md`.
-
-If you share your YouTube link, I can drop it into the README for you.
+1. Record YouTube demo and add URL to `README.md`  
+2. Review `DESIGN.md` authorship percentages  
+3. Push to GitHub before Gradescope
 
 ---
+
+## Outcome
+
+Initial submission document structure in the repo; `PROPOSAL_MARKED.md` maps proposal claims to code paths for grading.
+
+*Tool calls (read repo, write markdown files) omitted from this export.*
