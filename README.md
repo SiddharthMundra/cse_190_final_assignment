@@ -81,11 +81,9 @@ The Vite dev server **proxies** requests to **`/api/*`** to the API, so in devel
 npm run build
 ```
 
-Output: **`client/dist/`**. For production, run **`npm start`** — the server serves **`client/dist/`** and the API on one port (see **[DEPLOY.md](DEPLOY.md)** for Render).
+Output: **`client/dist/`**. For production, run **`npm start`** — the server serves **`client/dist/`** and the API on one port.
 
 ### Deploy on Render
-
-See **[DEPLOY.md](DEPLOY.md)** for step-by-step instructions. Summary:
 
 1. Connect the GitHub repo to a Render **Web Service** (or use **`render.yaml`** Blueprint).
 2. Set **`TRITON_*`** and **`VITE_FIREBASE_*`** env vars in the Render dashboard.
@@ -96,7 +94,7 @@ See **[DEPLOY.md](DEPLOY.md)** for step-by-step instructions. Summary:
 
 ## Demo video
 
-- **YouTube:** [Add your demo video URL here before Gradescope submit](https://www.youtube.com/watch?v=REPLACE_WITH_YOUR_VIDEO_ID)
+- **YouTube:** https://youtu.be/zYnco4uTTok
 
 ---
 

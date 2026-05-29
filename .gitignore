@@ -1,12 +1,28 @@
+# Environment / secrets — never commit
 .env
+.env.*
+**/.env
+**/.env.local
+**/.env.*.local
+!.env.example
+!**/.env.example
+
+# Python (legacy paths)
 .venv/
 __pycache__/
 *.pyc
 .pytest_cache/
 .ruff_cache/
+
+# Dependencies
 node_modules/
 
-# Backend runtime data — never commit user docs or extractions
+# Local media (demo video is on YouTube)
+*.mov
+*.mp4
+*.avi
+
+# Backend runtime data
 backend/storage/db.json
 backend/storage/eval-db.json
 backend/storage/files/

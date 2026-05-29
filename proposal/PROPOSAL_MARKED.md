@@ -17,7 +17,7 @@
 - Google sign-in: `client/src/auth/AuthContext.tsx`, `client/src/pages/LoginPage.tsx`
 - Document chat: `client/src/components/DocumentChat.tsx`, `server/index.js` (`POST /api/chat`)
 - Risk analysis + clause summaries: `server/index.js` (`POST /api/analyze`), `client/src/components/ResultsView.tsx`
-- Render deployment: `render.yaml`, `DEPLOY.md`
+- Render deployment: `render.yaml` (Web Service: build + `npm start`)
 
 > **Past Project Reference:** Extension of assignment 2; https://github.com/siddharthmundra/02-doc-scanner-superman-1
 
