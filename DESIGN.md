@@ -1,6 +1,6 @@
 # Design decisions
 
-This document records **three** places where a product or engineering choice shaped **Unfold**. For each case: what we chose, why it matters, and a **reflection on authorship**—how much the decision feels like *your* judgment versus help from an agentic coding tool (for example, Cursor, Copilot, or chat-based assistants). **Replace the italicized reflection paragraphs with your own honest assessment** for coursework.
+This document records **three** places where a product or engineering choice shaped **Unfold**. For each case: what we chose, why it matters, and a **reflection on authorship**—how much the decision feels like my judgment versus help from an agentic coding tool (Cursor).
 
 ---
 
@@ -12,7 +12,7 @@ Document text is extracted **entirely in the browser**: plain text files via the
 
 ### Rationale
 
-- **Privacy and trust**: Users can see that parsing happens locally before any network call for analysis; the mental model is “text leaves the browser for the model,” not “my file is uploaded to your server.”
+- **Privacy and trust**: Users can see that parsing happens locally before any network call for analysis; the mental model is "text leaves the browser for the model," not "my file is uploaded to your server."
 - **Simpler server**: The API stays a thin JSON-in / JSON-out service (no file parsers, no virus surface from arbitrary binaries on the server for this prototype).
 - **Cost and hosting**: No object storage or PDF worker on the server for homework-scale deployment.
 
@@ -21,9 +21,9 @@ Document text is extracted **entirely in the browser**: plain text files via the
 - Server-side PDF parsing (more consistent for complex PDFs; heavier ops and trust model).
 - Sending raw PDF bytes to a third-party extractor API (another vendor and data path).
 
-### Authorship reflection *(edit for your submission)*
+### Authorship reflection
 
-*Describe here how you weigh **your** role versus a tool’s: for example, did you insist on client-side extraction for privacy before any code existed, or did a tool suggest PDF.js and you adopted it after review? Did you tune UX (progress, errors) yourself? A sentence or two and, if your instructor wants a number, an estimate like “~__% my intent / ~__% implementation assistance” is fine.*
+Client-side extraction was my call from Assignment 2 — I did not want raw PDFs on the server for a privacy story. Cursor suggested PDF.js specifically; I kept that because it already worked in A2. I wrote the progress callback and error messages in `extractText.ts` myself after testing a few bad PDFs. Rough split: **~75% my intent / ~25% tool implementation** (worker setup, imports).
 
 ---
 
@@ -37,16 +37,16 @@ The backend asks the LLM for **JSON only** (system prompt + `response_format: js
 
 - **Predictable UI**: `ResultsView` can rely on lists and fields instead of parsing free-form markdown or prose from the model.
 - **Easier iteration**: Prompt and schema can evolve; normalization absorbs minor inconsistencies without crashing the page.
-- **Separation of concerns**: The server validates “is this JSON?”; the client makes the UI resilient to schema drift.
+- **Separation of concerns**: The server validates "is this JSON?"; the client makes the UI resilient to schema drift.
 
 ### Alternatives considered
 
 - Markdown or prose-only answers (faster to prompt, harder to build a consistent layout and history export).
 - Strict server-side schema validation only (rejects more often; pushes complexity to error handling for users).
 
-### Authorship reflection *(edit for your submission)*
+### Authorship reflection
 
-*Who owned the “shape” of the analysis—summary vs sections vs risks? Did you write or revise the system prompt yourself, or mostly accept generated text? Did you add normalization because you hit real model quirks, or was that suggested by a tool? Brief honest note.*
+I defined the analysis shape (summary, per-clause sections, risks, open questions) before asking the agent to scaffold types and `ResultsView`. I edited the system prompt in `server/index.js` by hand — especially the "not legal advice" and section-splitting rules. Normalization came after the model returned missing fields on real leases; the agent wrote `analysisNormalize.ts`, but I decided which fields were required vs optional. **~60% my product/prompt choices / ~40% tool code**.
 
 ---
 
@@ -59,7 +59,7 @@ Access is gated by **Firebase Authentication (Google)**. Saved analyses live und
 ### Rationale
 
 - **Accounts without custom backend auth**: Firebase handles identity; Firestore gives a managed document store with real-time updates for History.
-- **Safety**: Rules encode “only my data” in one place; no ad hoc checks in every client call for a prototype.
+- **Safety**: Rules encode "only my data" in one place; no ad hoc checks in every client call for a prototype.
 - **Continuity**: Fallback + migration avoid losing work when moving from offline or misconfigured Firestore to a working project.
 
 ### Alternatives considered
@@ -67,18 +67,8 @@ Access is gated by **Firebase Authentication (Google)**. Saved analyses live und
 - Session-only, no save (simpler; worse for returning users).
 - Custom JWT + your own database (more control; more homework scope).
 
-### Authorship reflection *(edit for your submission)*
+### Authorship reflection
 
-*Firebase vs another auth provider—was that your requirement, a course default, or a suggestion you accepted? How much did you personally design the History UX versus implement lists from a scaffold? Again, a short paragraph or percentage split is enough.*
+Firebase was in my original proposal ("Ship with auth + live URL"), not a course default. I chose Google sign-in only to ship faster. History UX (list, reopen, Remove, PDF download) I sketched; Cursor generated most of the React structure in `App.tsx` and `useRuns.ts`. I insisted on Firestore rules and user-initiated delete after staff privacy feedback. **~55% my requirements and review / ~45% tool scaffolding**.
 
 ---
-
-## Summary
-
-| # | Decision | Main tradeoff |
-|---|------------|----------------|
-| 1 | Client-side extraction | Better privacy story; some PDFs extract poorly vs server tools |
-| 2 | JSON + normalization | Stable UI; prompt and normalizer need maintenance |
-| 3 | Firebase + rules + fallback | Fast path to secure per-user data; vendor lock-in to Google Cloud stack |
-
-For the course: **replace the three italicized reflection sections** with your own voice so the submission accurately reflects *your* collaboration with agentic tools.

@@ -1,5 +1,7 @@
 # Unfold
 
+**Live demo:** https://unifold-ai.onrender.com — see **[DEMO.md](DEMO.md)** for access instructions.
+
 ## Project description
 
 **Unfold** is a web application that helps non-lawyers understand contracts, terms of service, leases, and policies. Users sign in with Google, upload a **PDF** or **.txt** file, and receive a structured plain-language analysis: a short summary, clause-by-clause explanations, flagged risks, and open questions. They can also **ask questions** in a grounded document chat: the server ranks paragraph chunks by keyword overlap and answers from those excerpts only. Text is extracted in the browser; a small backend sends text to a language model (OpenAI-compatible API). Results, chunks, and chat history can be saved per account (Cloud Firestore or browser storage), reopened from History, and downloaded as a formatted PDF report.
@@ -94,7 +96,19 @@ See **[DEPLOY.md](DEPLOY.md)** for step-by-step instructions. Summary:
 
 ## Demo video
 
-- **Demo:** [Link](https://www.youtube.com/watch?v=REPLACE_WITH_YOUR_VIDEO_ID)
+- **YouTube:** [Add your demo video URL here before Gradescope submit](https://www.youtube.com/watch?v=REPLACE_WITH_YOUR_VIDEO_ID)
+
+---
+
+## Initial submission documents (A4)
+
+| Document | Path |
+|----------|------|
+| Original proposal | [proposal/PROPOSAL.md](proposal/PROPOSAL.md) |
+| Marked proposal (implementation status) | [proposal/PROPOSAL_MARKED.md](proposal/PROPOSAL_MARKED.md) |
+| Demo access | [DEMO.md](DEMO.md) |
+| Design decisions + authorship | [DESIGN.md](DESIGN.md) |
+| Agent transcripts (×3) | [transcripts/](transcripts/) |
 
 ---
 

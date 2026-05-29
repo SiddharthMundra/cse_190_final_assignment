@@ -134,8 +134,4 @@ On first sign-in with Firestore available, if the user had local runs, [`migrate
 
 ---
 
-## Deployment considerations (brief)
-
-- **Client**: static files from `npm run build` (`client/dist`).
-- **Server**: run Node with `server/index.js` (or your process manager), with `TRITON_*` and `PORT` set. Ensure the public URL the browser uses can reach `/api` (same host + proxy, or CORS and absolute API URL changes if you split origins).
-- **Firebase**: deploy rules with Firebase CLI (`firebase deploy --only firestore:rules` as noted in `client/.env.example`).
+\
