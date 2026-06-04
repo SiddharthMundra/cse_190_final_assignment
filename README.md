@@ -83,13 +83,6 @@ npm run build
 
 Output: **`client/dist/`**. For production, run **`npm start`** — the server serves **`client/dist/`** and the API on one port.
 
-### Deploy on Render
-
-1. Connect the GitHub repo to a Render **Web Service** (or use **`render.yaml`** Blueprint).
-2. Set **`TRITON_*`** and **`VITE_FIREBASE_*`** env vars in the Render dashboard.
-3. Add your `*.onrender.com` host to **Firebase → Authorized domains**.
-4. Build: `npm install && npm run build` · Start: `npm start`
-
 ---
 
 ## Demo video
