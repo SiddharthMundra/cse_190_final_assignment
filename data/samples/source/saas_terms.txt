@@ -1,0 +1,76 @@
+These CloudFlow Software-as-a-Service Terms of Service ("Terms") govern access to the CloudFlow platform and related APIs (the "Service") provided by CloudFlow Labs, Inc. ("Provider") to the customer identified in an order form or registration ("Customer"). By creating an account or clicking accept, Customer agrees to these Terms.
+
+## 1. Service Description and License
+
+Provider grants Customer a non-exclusive, non-transferable right to access the Service during the Subscription Term for internal business purposes, subject to usage limits in the applicable plan. Provider may update features with reasonable notice; material reductions require thirty (30) days' notice or a pro-rata refund option. Customer shall not reverse engineer, resell, or use the Service to build a competing product.
+
+## 2. Fees and Billing
+
+Subscription fees are billed monthly or annually in advance according to the selected plan. Standard Professional plan pricing is $899 per month for up to twenty-five (25) seats and 500 GB storage; overage storage is $0.18 per GB-month. Late payments accrue interest at 1.5% per month or the maximum legal rate. Provider may suspend access after fifteen (15) days' notice of non-payment.
+
+## 3. Customer Data and Privacy
+
+Customer retains ownership of data uploaded to the Service ("Customer Data"). Provider processes Customer Data only to provide the Service, prevent abuse, and as described in the Privacy Policy. Provider implements encryption in transit (TLS 1.2+) and at rest (AES-256) for production databases. Customer is responsible for configuring access controls and obtaining consents from its end users.
+
+## 4. Security and Availability
+
+Provider targets 99.5% monthly uptime excluding scheduled maintenance announced at least forty-eight (48) hours in advance. Scheduled maintenance windows are Sundays 2:00–6:00 a.m. UTC. Provider maintains SOC 2 Type II controls and will notify Customer of confirmed security incidents affecting Customer Data within seventy-two (72) hours.
+
+## 5. Acceptable Use
+
+Customer shall not upload malware, send unsolicited bulk messages through integrations, scrape third-party sites in violation of their terms, or store regulated health data on Standard plans without a signed Business Associate Agreement. Provider may throttle or suspend accounts that degrade Service performance for others after written warning when practicable.
+
+## 6. Support and SLA Credits
+
+Email support with eight (8) business hour response targets is included. Critical outages may qualify for service credits of five percent (5%) of monthly fees per full day of downtime below the uptime commitment, capped at twenty-five percent (25%) monthly. Credits are Customer's sole remedy for availability failures unless mandatory law provides otherwise.
+
+## 7. Confidentiality
+
+Each Party shall protect the other's non-public information with reasonable care and use it only to perform under these Terms. Confidentiality obligations survive five (5) years after termination, except trade secrets which remain protected as long as they qualify.
+
+## 8. Term and Termination
+
+The initial Subscription Term is twelve (12) months from activation and renews automatically for successive twelve (12) month periods unless either Party gives thirty (30) days' notice before renewal. Either Party may terminate for material breach uncured within thirty (30) days of notice. Upon termination, Provider shall make Customer Data available for export for thirty (30) days, then delete within ninety (90) days except backups retained up to one hundred eighty (180) days.
+
+## 9. Warranties and Disclaimer
+
+Provider warrants that the Service will materially conform to published documentation. EXCEPT AS STATED, THE SERVICE IS PROVIDED AS IS WITHOUT WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. Provider does not warrant uninterrupted or error-free operation.
+
+## 10. Limitation of Liability
+
+NEITHER PARTY SHALL BE LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES. PROVIDER'S TOTAL LIABILITY ARISING FROM THESE TERMS SHALL NOT EXCEED THE FEES PAID BY CUSTOMER IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM. Limits do not apply to gross negligence, willful misconduct, or Customer's payment obligations.
+
+## 11. Data Processing Addendum
+
+Customers processing personal data of EU residents may execute Provider's Standard Contractual Clauses. Sub-processors are listed at cloudflow.example/subprocessors with thirty (30) days' notice of material changes.
+
+## 12. Governing Law and Disputes
+
+These Terms are governed by the laws of the State of Delaware, excluding conflict rules. Exclusive jurisdiction lies in the state or federal courts of Wilmington, Delaware, except Provider may seek injunctive relief anywhere. The United Nations Convention on Contracts for the International Sale of Goods does not apply.
+
+## 13. Beta Features and API Access
+
+Provider may offer beta features or preview APIs identified as such in documentation. Beta features are excluded from uptime commitments and may be discontinued without liability. API rate limits for Professional plans default to six hundred (600) requests per minute per API key unless otherwise stated in an order form.
+
+## 14. Audit and Compliance
+
+Upon reasonable notice, Customer may request a summary of Provider's most recent SOC 2 report under NDA no more than once per year. Customer shall not conduct intrusive penetration testing against production systems without Provider's written approval and coordinated window.
+
+## 15. Publicity and References
+
+Neither Party may use the other's name or logo in marketing materials without prior written consent, except that Provider may list Customer as a generic logo on its website if Customer opts in through account settings.
+
+## 16. Force Majeure
+
+Neither Party is liable for delay or failure to perform due to events beyond reasonable control, including natural disasters, widespread internet outages, or government orders, provided the affected Party gives prompt notice and resumes performance when practicable.
+
+## 17. General
+
+Customer may not assign these Terms without Provider's consent, except to a successor in a merger. Provider may assign to an affiliate or acquirer. Notices to Provider: legal@cloudflow.example. Entire agreement; amendments only in writing signed by both Parties.
+
+SIG:
+PROVIDER: CloudFlow Labs, Inc. — Authorized Signatory ___________________________
+Date: January 10, 2026
+
+CUSTOMER: ___________________________ Title: ___________________________
+Date: ___________________________

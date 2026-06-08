@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { authFetch } from "../api/authFetch";
 import type { ChatMessage, DocumentChunk } from "../types";
 
 type Props = {
@@ -42,15 +43,14 @@ export function DocumentChat({
     onMessagesChange(pending);
 
     try {
-      const res = await fetch("/api/chat", {
+      const res = await authFetch("/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: {
           userId,
           question,
           chunks,
           history: messages.map((m) => ({ role: m.role, content: m.content })),
-        }),
+        },
       });
       const data = await res.json();
       if (!res.ok) {
@@ -62,6 +62,11 @@ export function DocumentChat({
         content: typeof data.answer === "string" ? data.answer : "",
         quotes: Array.isArray(data.quotes) ? data.quotes : undefined,
         unclear: Boolean(data.unclear),
+        retrievalWarning:
+          typeof data.retrievalWarning === "string"
+            ? data.retrievalWarning
+            : undefined,
+        retrievalFailed: Boolean(data.retrievalFailed),
         createdAt: new Date().toISOString(),
       };
       onMessagesChange([...pending, assistantMsg]);
@@ -130,6 +135,14 @@ export function DocumentChat({
                 {m.role === "user" ? "You" : "Unfold"}
               </span>
               <p>{m.content}</p>
+              {m.role === "assistant" && m.retrievalWarning ? (
+                <p
+                  className={`doc-chat-retrieval ${m.retrievalFailed ? "doc-chat-retrieval--failed" : ""}`}
+                  role="status"
+                >
+                  {m.retrievalWarning}
+                </p>
+              ) : null}
               {m.role === "assistant" && m.unclear ? (
                 <p className="doc-chat-unclear" role="status">
                   The document excerpts may not fully support this answer.

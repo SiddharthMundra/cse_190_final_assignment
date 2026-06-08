@@ -48,7 +48,38 @@ export type ChatMessage = {
   content: string;
   quotes?: string[];
   unclear?: boolean;
+  retrievalWarning?: string;
+  retrievalFailed?: boolean;
   createdAt: string;
+};
+
+export type CompareAlignment = {
+  topic: string;
+  doc_a_says: string;
+  doc_b_says: string;
+};
+
+export type CompareConflict = {
+  topic: string;
+  plain: string;
+  doc_a_quote?: string;
+  doc_b_quote?: string;
+};
+
+export type CompareGap = {
+  topic: string;
+  only_in: "a" | "b";
+  plain: string;
+};
+
+export type CompareResult = {
+  summary: string;
+  alignments: CompareAlignment[];
+  conflicts: CompareConflict[];
+  gaps: CompareGap[];
+  docA: string;
+  docB: string;
+  retrievalWarnings?: { status: string; message: string }[];
 };
 
 export type SavedRun = {

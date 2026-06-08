@@ -71,6 +71,8 @@ The backend returns JSON matching the [OpenAI chat completions](https://platform
 | ----- | -------------------- | ----------------------------------------------------------------- |
 | HTTP  | Express 4            | JSON body parser (large limit for document text), CORS enabled.   |
 | LLM   | `openai` npm package | Chat completions with `response_format: { type: "json_object" }`. |
+| Auth  | `firebase-admin`       | Verify ID tokens on `/api/analyze`, `/api/chat`, `/api/compare`.  |
+| Quotas | Firestore (Admin)   | Per-user daily counts in `users/{uid}/usage/{date}_{action}`.     |
 
 
 ### Configuration
@@ -84,6 +86,9 @@ Environment variables are loaded from the **project root** `.env` and optionally
 | `TRITON_API_KEY`  | Bearer-style API key for the LLM endpoint.                                                   |
 | `TRITON_MODEL`    | Model id sent to `chat.completions.create` (default `gpt-oss-120b`).                         |
 | `PORT`            | Listen port (default **8787**).                                                              |
+| `FIREBASE_PROJECT_ID` | Firebase project for Admin SDK (auth + quotas).                                            |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | Service account JSON for production.                                               |
+| `ANALYZE_DAILY_LIMIT` / `CHAT_DAILY_LIMIT` / `COMPARE_DAILY_LIMIT` | Per-user daily caps.                          |
 
 
 If `TRITON_BASE_URL` or `TRITON_API_KEY` is missing, the client receives **503** on `/api/analyze` with a hint; `/api/health` still returns `llmConfigured: false`.
@@ -93,11 +98,19 @@ If `TRITON_BASE_URL` or `TRITON_API_KEY` is missing, the client receives **503**
 
 | Method / path       | Behavior                                                                                                                                                              |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /api/health`   | `{ ok, llmConfigured, model }` — used by the About page to show whether the model is configured.                                                                      |
-| `POST /api/analyze` | Body: `{ text: string }`. Validates non-empty text and max length (~120k chars). Returns `{ result, model }` where `result` is the parsed JSON object from the model. |
+| `GET /api/health`   | `{ ok, llmConfigured, model }`                                                                                                                                        |
+| `POST /api/analyze` | Bearer auth. Body: `{ text }`. Chunks text, calls LLM, returns `{ result, model, chunks }`. Firestore rate limit.                                                     |
+| `POST /api/chat`    | Bearer auth. Body: `{ question, chunks, history? }`. Synonym-aware `topKChunks`, returns `{ answer, quotes, unclear, retrievalWarning, retrieval }`.                 |
+| `POST /api/compare` | Bearer auth. Body: `{ docA: { label, chunks }, docB: { label, chunks }, focus? }`. Returns `{ summary, alignments, conflicts, gaps, retrievalWarnings }`.            |
+| `POST /api/chunk`   | Body: `{ text }`. Returns paragraph chunks (no auth required).                                                                                                        |
 
 
-The system prompt instructs the model to output **only** JSON with legal-document simplification fields (summary, sections, risks, open questions).
+### Relevance (`server/relevance.js`)
+
+- Paragraph chunks from `chunkText.js`
+- Token overlap with **LEGAL_SYNONYMS** expansion (plain ↔ legal terms)
+- Returns `{ chunks, retrieval }` where `retrieval.status` is `ok`, `weak`, or `failed`
+- Chat and compare surfaces `retrievalWarning` when status is not `ok`
 
 ---
 
@@ -130,9 +143,10 @@ On first sign-in with Firestore available, if the user had local runs, `[migrate
 
 ## Authentication
 
-- Implemented with **Firebase Authentication** and **Google** as the provider (`[AuthContext.tsx](client/src/auth/AuthContext.tsx)`).
-- The app requires a signed-in user for the main UI (`LoginPage` when `user` is null).
-- If Firebase env vars are missing, `getFirebaseAuth()` may be null; configure `VITE_FIREBASE_`* in `client/.env` for normal operation.
+- Implemented with **Firebase Authentication** and **Google** as the provider (`AuthContext.tsx`).
+- Client sends **Firebase ID token** on API calls via `client/src/api/authFetch.ts`.
+- Server verifies tokens with **Firebase Admin** (`server/verifyAuth.js`). Production requires a valid Bearer token.
+- If Admin is not configured, local dev may fall back to `userId` in the request body.
 
 ---
 

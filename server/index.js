@@ -28,6 +28,7 @@ import OpenAI from "openai";
 import { chunkText } from "./chunkText.js";
 import { topKChunks } from "./relevance.js";
 import { checkRateLimit, parseLimit } from "./rateLimit.js";
+import { verifyBearerToken } from "./verifyAuth.js";
 
 const app = express();
 app.use(cors({ origin: true }));
@@ -87,21 +88,105 @@ Set "unclear" to true when the excerpts do not contain enough information to ans
 Do not invent clauses, dates, or obligations that are not supported by the excerpts.
 If the user asks for legal advice (e.g. whether to sign), decline and remind them this tool is informational only.`;
 
+const COMPARE_SYSTEM_PROMPT = `You compare two legal or policy documents for a non-lawyer reader.
+
+Return ONLY valid JSON (no markdown fences):
+{
+  "summary": "2-4 sentences: the big picture of how these documents relate and what to watch.",
+  "alignments": [
+    {
+      "topic": "short label",
+      "doc_a_says": "plain English summary of document A on this topic",
+      "doc_b_says": "plain English summary of document B on this topic"
+    }
+  ],
+  "conflicts": [
+    {
+      "topic": "short label",
+      "plain": "why the documents disagree or create tension",
+      "doc_a_quote": "optional short quote from A",
+      "doc_b_quote": "optional short quote from B"
+    }
+  ],
+  "gaps": [
+    {
+      "topic": "short label",
+      "only_in": "a|b",
+      "plain": "what one document covers that the other omits"
+    }
+  ]
+}
+
+Use ONLY the excerpts provided for each document. Do not give legal advice.
+If the focus question is provided, prioritize topics relevant to that question.`;
+
 const ANALYZE_DAILY_LIMIT = parseLimit("ANALYZE_DAILY_LIMIT", 25);
 const CHAT_DAILY_LIMIT = parseLimit("CHAT_DAILY_LIMIT", 80);
+const COMPARE_DAILY_LIMIT = parseLimit("COMPARE_DAILY_LIMIT", 15);
 
-function requireUserId(req, res) {
-  const uid =
-    typeof req.body?.userId === "string"
-      ? req.body.userId.trim()
-      : typeof req.headers["x-user-id"] === "string"
-        ? req.headers["x-user-id"].trim()
-        : "";
+const isProduction =
+  process.env.NODE_ENV === "production" || Boolean(process.env.RENDER);
+
+function userIdFromBody(req) {
+  return typeof req.body?.userId === "string"
+    ? req.body.userId.trim()
+    : typeof req.headers["x-user-id"] === "string"
+      ? req.headers["x-user-id"].trim()
+      : "";
+}
+
+/** Resolve authenticated uid via Firebase ID token; production requires a valid token. */
+async function requireAuthenticatedUser(req, res) {
+  const verified = await verifyBearerToken(req);
+  if (verified && "uid" in verified) return verified.uid;
+  if (verified && "error" in verified) {
+    res.status(verified.status).json({ error: verified.error });
+    return null;
+  }
+
+  if (isProduction) {
+    res.status(401).json({
+      error:
+        "Missing or invalid Firebase authentication. Sign in and ensure FIREBASE_PROJECT_ID + FIREBASE_SERVICE_ACCOUNT_JSON are set on the server.",
+    });
+    return null;
+  }
+
+  const uid = userIdFromBody(req);
   if (!uid) {
     res.status(400).json({ error: "Missing userId (sign in required)" });
     return null;
   }
   return uid;
+}
+
+function normalizeChunks(raw, label) {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(
+      (c) =>
+        c &&
+        typeof c.text === "string" &&
+        c.text.trim() &&
+        typeof c.id === "string",
+    )
+    .map((c, i) => ({
+      id: String(c.id),
+      index: typeof c.index === "number" ? c.index : i,
+      text: c.text.trim(),
+      source: label,
+    }));
+}
+
+function excerptBlockForDoc(label, chunks, question, topK = 5) {
+  const { chunks: selected, retrieval } = topKChunks(chunks, question, topK);
+  const block = selected
+    .map(
+      (c, i) =>
+        `[${label} excerpt ${i + 1} | chunk ${c.id} | score ${c.score ?? 0}]\n${c.text}`,
+    )
+    .join("\n\n---\n\n");
+  return { block, selected, retrieval };
 }
 
 app.get("/api/health", (_req, res) => {
@@ -125,7 +210,7 @@ app.post("/api/chunk", (req, res) => {
 });
 
 app.post("/api/analyze", async (req, res) => {
-  const uid = requireUserId(req, res);
+  const uid = await requireAuthenticatedUser(req, res);
   if (!uid) return;
 
   const text = typeof req.body?.text === "string" ? req.body.text.trim() : "";
@@ -136,7 +221,7 @@ app.post("/api/analyze", async (req, res) => {
     return res.status(400).json({ error: "Text too long for this prototype" });
   }
 
-  const limited = checkRateLimit(uid, "analyze", ANALYZE_DAILY_LIMIT);
+  const limited = await checkRateLimit(uid, "analyze", ANALYZE_DAILY_LIMIT);
   if (!limited.ok) {
     return res.status(429).json({ error: limited.error, limit: limited.limit });
   }
@@ -188,7 +273,7 @@ app.post("/api/analyze", async (req, res) => {
 });
 
 app.post("/api/chat", async (req, res) => {
-  const uid = requireUserId(req, res);
+  const uid = await requireAuthenticatedUser(req, res);
   if (!uid) return;
 
   const question =
@@ -221,7 +306,7 @@ app.post("/api/chat", async (req, res) => {
     });
   }
 
-  const limited = checkRateLimit(uid, "chat", CHAT_DAILY_LIMIT);
+  const limited = await checkRateLimit(uid, "chat", CHAT_DAILY_LIMIT);
   if (!limited.ok) {
     return res.status(429).json({ error: limited.error, limit: limited.limit });
   }
@@ -238,7 +323,7 @@ app.post("/api/chat", async (req, res) => {
     8,
     Math.max(1, Number(req.body?.topK) || 4),
   );
-  const selected = topKChunks(validChunks, question, topK);
+  const { chunks: selected, retrieval } = topKChunks(validChunks, question, topK);
   const history = Array.isArray(req.body?.history)
     ? req.body.history
         .filter(
@@ -296,12 +381,21 @@ app.post("/api/chat", async (req, res) => {
     const quotes = Array.isArray(parsed.quotes)
       ? parsed.quotes.filter((q) => typeof q === "string" && q.trim())
       : [];
-    const unclear = Boolean(parsed.unclear);
+    const unclear =
+      Boolean(parsed.unclear) || retrieval.status === "failed";
+
+    const retrievalWarning =
+      retrieval.message && retrieval.status !== "ok"
+        ? retrieval.message
+        : null;
 
     return res.json({
       answer,
       quotes,
       unclear,
+      retrieval,
+      retrievalWarning,
+      retrievalFailed: retrieval.status === "failed",
       model,
       chunksUsed: selected.map(({ id, index, score }) => ({ id, index, score })),
       usage: { chatRemaining: limited.remaining },
@@ -312,9 +406,111 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
+app.post("/api/compare", async (req, res) => {
+  const uid = await requireAuthenticatedUser(req, res);
+  if (!uid) return;
+
+  const docA = req.body?.docA;
+  const docB = req.body?.docB;
+  const labelA =
+    typeof docA?.label === "string" && docA.label.trim()
+      ? docA.label.trim()
+      : "Document A";
+  const labelB =
+    typeof docB?.label === "string" && docB.label.trim()
+      ? docB.label.trim()
+      : "Document B";
+
+  const chunksA = normalizeChunks(docA?.chunks, labelA);
+  const chunksB = normalizeChunks(docB?.chunks, labelB);
+
+  if (chunksA.length === 0 || chunksB.length === 0) {
+    return res.status(400).json({
+      error:
+        "Both documents need stored chunks. Re-open saved runs from History or re-analyze each file.",
+    });
+  }
+
+  const focus =
+    typeof req.body?.focus === "string" ? req.body.focus.trim() : "";
+  const question =
+    focus ||
+    "Compare obligations, restrictions, fees, termination, and any conflicts between these documents.";
+
+  const limited = await checkRateLimit(uid, "compare", COMPARE_DAILY_LIMIT);
+  if (!limited.ok) {
+    return res.status(429).json({ error: limited.error, limit: limited.limit });
+  }
+
+  if (!client) {
+    return res.status(503).json({
+      error: "LLM not configured",
+      hint:
+        "Set TRITON_BASE_URL, TRITON_API_KEY, and TRITON_MODEL in .env (project root or server/)",
+    });
+  }
+
+  const partA = excerptBlockForDoc(labelA, chunksA, question, 5);
+  const partB = excerptBlockForDoc(labelB, chunksB, question, 5);
+  const retrievalWarnings = [partA.retrieval, partB.retrieval].filter(
+    (r) => r.status !== "ok" && r.message,
+  );
+
+  try {
+    const completion = await client.chat.completions.create({
+      model,
+      temperature: 0.2,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: COMPARE_SYSTEM_PROMPT },
+        {
+          role: "user",
+          content: `Focus: ${question}\n\n=== ${labelA} ===\n${partA.block || "(no excerpts)"}\n\n=== ${labelB} ===\n${partB.block || "(no excerpts)"}`,
+        },
+      ],
+    });
+
+    const raw = completion.choices[0]?.message?.content ?? "{}";
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return res.status(502).json({
+        error: "Model returned non-JSON",
+        raw,
+      });
+    }
+
+    const summary =
+      typeof parsed.summary === "string" ? parsed.summary.trim() : "";
+    const alignments = Array.isArray(parsed.alignments)
+      ? parsed.alignments.filter((a) => a && typeof a.topic === "string")
+      : [];
+    const conflicts = Array.isArray(parsed.conflicts)
+      ? parsed.conflicts.filter((c) => c && typeof c.topic === "string")
+      : [];
+    const gaps = Array.isArray(parsed.gaps)
+      ? parsed.gaps.filter((g) => g && typeof g.topic === "string")
+      : [];
+
+    return res.json({
+      summary,
+      alignments,
+      conflicts,
+      gaps,
+      model,
+      docA: labelA,
+      docB: labelB,
+      retrievalWarnings,
+      usage: { compareRemaining: limited.remaining },
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return res.status(502).json({ error: message });
+  }
+});
+
 const clientDist = path.join(__dirname, "..", "client", "dist");
-const isProduction =
-  process.env.NODE_ENV === "production" || Boolean(process.env.RENDER);
 
 if (isProduction) {
   app.use(express.static(clientDist, { index: false }));

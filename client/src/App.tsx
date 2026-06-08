@@ -1,11 +1,14 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
+import { authFetch } from "./api/authFetch";
 import { useAuth } from "./auth/AuthContext";
 import { normalizeAnalysis } from "./analysisNormalize";
+import { CompareView } from "./components/CompareView";
 import { DocumentChat } from "./components/DocumentChat";
 import { ResultsView } from "./components/ResultsView";
 import { extractTextFromFile } from "./extractText";
@@ -14,7 +17,8 @@ import { useRuns } from "./hooks/useRuns";
 import { LoginPage } from "./pages/LoginPage";
 import type { Analysis, ChatMessage, DocumentChunk, SavedRun } from "./types";
 
-type Page = "home" | "history" | "about";
+type Page = "home" | "history" | "compare" | "about";
+type HistorySort = "newest" | "oldest" | "name";
 
 function formatWhen(iso: string): string {
   try {
@@ -48,6 +52,8 @@ export function App() {
     configured: boolean;
     name: string | null;
   }>({ loading: true, configured: false, name: null });
+  const [historyQuery, setHistoryQuery] = useState("");
+  const [historySort, setHistorySort] = useState<HistorySort>("newest");
 
   const clearProgressTicker = useCallback(() => {
     if (progressTickerRef.current != null) {
@@ -180,10 +186,9 @@ export function App() {
           throw new Error("Sign in required to analyze documents.");
         }
 
-        const res = await fetch("/api/analyze", {
+        const res = await authFetch("/api/analyze", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, userId: user.uid }),
+          body: { text, userId: user.uid },
         });
         const data = await res.json();
         clearProgressTicker();
@@ -298,6 +303,24 @@ export function App() {
     [currentRunId, deleteRun],
   );
 
+  const filteredRuns = useMemo(() => {
+    const q = historyQuery.trim().toLowerCase();
+    const matched = q
+      ? runs.filter((run) => run.fileName.toLowerCase().includes(q))
+      : runs;
+
+    return [...matched].sort((a, b) => {
+      if (historySort === "name") {
+        return a.fileName.localeCompare(b.fileName, undefined, {
+          sensitivity: "base",
+        });
+      }
+      const ta = Date.parse(a.savedAt) || 0;
+      const tb = Date.parse(b.savedAt) || 0;
+      return historySort === "newest" ? tb - ta : ta - tb;
+    });
+  }, [runs, historyQuery, historySort]);
+
   if (authLoading) {
     return (
       <div className="site">
@@ -356,6 +379,17 @@ export function App() {
               }}
             >
               History
+            </a>
+            <a
+              href="#compare"
+              className={`header-link ${page === "compare" ? "is-active" : ""}`}
+              aria-current={page === "compare" ? "page" : undefined}
+              onClick={(e) => {
+                e.preventDefault();
+                setPage("compare");
+              }}
+            >
+              Compare
             </a>
             <a
               href="#about"
@@ -523,6 +557,35 @@ export function App() {
             <p className="muted small">Loading saved runs…</p>
           ) : null}
 
+          {runs.length > 0 ? (
+            <div className="history-toolbar">
+              <label className="history-search">
+                <span className="sr-only">Search by filename</span>
+                <input
+                  type="search"
+                  className="history-search-input"
+                  placeholder="Search by filename…"
+                  value={historyQuery}
+                  onChange={(e) => setHistoryQuery(e.target.value)}
+                />
+              </label>
+              <label className="history-sort">
+                <span className="history-sort-label">Sort</span>
+                <select
+                  className="history-sort-select"
+                  value={historySort}
+                  onChange={(e) =>
+                    setHistorySort(e.target.value as HistorySort)
+                  }
+                >
+                  <option value="newest">Newest first</option>
+                  <option value="oldest">Oldest first</option>
+                  <option value="name">Filename A–Z</option>
+                </select>
+              </label>
+            </div>
+          ) : null}
+
           <aside className="sidebar" aria-label="Saved analyses">
             <div className="sidebar-inner">
               <ul className="run-list">
@@ -530,8 +593,12 @@ export function App() {
                   <li className="muted small" style={{ padding: "0.5rem 0" }}>
                     No saved runs yet. Upload a document from Homescreen.
                   </li>
+                ) : filteredRuns.length === 0 ? (
+                  <li className="muted small" style={{ padding: "0.5rem 0" }}>
+                    No runs match “{historyQuery.trim()}”.
+                  </li>
                 ) : (
-                  runs.map((run) => (
+                  filteredRuns.map((run) => (
                     <li key={run.id} className="run-card">
                       <button
                         type="button"
@@ -566,6 +633,21 @@ export function App() {
             </div>
           </aside>
         </div>
+        </div>
+      )}
+
+      {page === "compare" && (
+        <div className="view-shell view-shell--compare">
+          <div className="main-wrap">
+            <div className="page-header">
+              <h2>Compare documents</h2>
+              <p>
+                Pick two saved analyses — for example a lease and a pet policy —
+                to see where they align, conflict, or leave gaps.
+              </p>
+            </div>
+            <CompareView runs={runs} userId={user.uid} />
+          </div>
         </div>
       )}
 
@@ -621,8 +703,22 @@ export function App() {
             <h3>Document chat relevance</h3>
             <p>
               For each question, the server ranks stored paragraph chunks by
-              keyword overlap with your question and sends only the top matches
-              to the model, which must answer from those excerpts only.
+              keyword overlap (with a plain-language ↔ legal-term synonym map)
+              and sends only the top matches to the model. When retrieval is
+              weak, the chat shows a warning before the answer.
+            </p>
+            <h3>Compare two documents</h3>
+            <p>
+              The Compare page loads two saved runs from your account, retrieves
+              relevant excerpts from each, and highlights alignments, conflicts,
+              and coverage gaps. Useful for checking addenda against a main
+              contract.
+            </p>
+            <h3>Usage limits</h3>
+            <p>
+              Analyze, chat, and compare requests are counted per user per day
+              in Firestore when the server is configured with Firebase Admin
+              credentials.
             </p>
             <h3>Disclaimer</h3>
             <p>
@@ -665,6 +761,19 @@ export function App() {
               }}
             >
               History
+            </a>
+            <span className="footer-sep" aria-hidden="true">
+              ·
+            </span>
+            <a
+              href="#compare"
+              className="footer-link"
+              onClick={(e) => {
+                e.preventDefault();
+                setPage("compare");
+              }}
+            >
+              Compare
             </a>
             <span className="footer-sep" aria-hidden="true">
               ·

@@ -30,4 +30,18 @@ The other option was to let the model write free-form prose and parse it later. 
 
 You have to sign in with Google to use the hosted app. Saves go under `users/{your uid}/runs/...` in Firestore, and the security rules only let you read and write your own subtree. If Firestore isn't configured but you're signed in, the app can still stash runs in `localStorage`; the first time cloud save works, those local runs get copied up and cleared locally.
 
-Firebase was in my proposal from the start—I picked the "ship with auth + live URL" track and didn't want to build login myself. Google-only was a time call, not a deep product decision. The History page (list of past docs, open one again, delete, download PDF) is layout I cared about; a lot of the React in `App.tsx` and `useRuns.ts` came from Cursor and I tweaked it. After staff feedback on privacy I made sure delete actually removes a run and that the rules file says other users can't see your data. I was also honest in the About page that someone with Firebase console access could technically look at stored docs—that's true and pretending otherwise felt wrong.
+Firebase was in my proposal from the start—I picked the "ship with auth + live URL" track and didn't want to build login myself. Google-only was a time call, not a deep product decision. The History page (list of past docs, open one again, delete, download PDF) is layout I cared about; a lot of the React in `App.tsx` and `useRuns.ts` came from Cursor and I tweaked it. After staff feedback on the **initial proposal** I made sure delete actually removes a run and that the rules file says other users can't see your data. On **review day**, reviewers asked directly about privacy — what's stored, who can access it, and whether users have options — so I expanded the upload notice and About page: browser extraction first, Firestore per account, delete from History, and an honest note that Firebase console admins (course staff) could technically view stored data. This is a student demo, not a production legal vault.
+
+**Review day + staff email (rate limits):** Reviewers worried about API abuse on the public Render URL. I moved daily quotas into Firestore (`users/{uid}/usage/`) so limits survive restarts, and added Firebase ID token verification so the server doesn't trust a client-sent `userId` (`verifyAuth.js`, `authFetch.ts`).
+
+---
+
+## 4. Lexical retrieval, synonyms, and honest warnings
+
+Document chat ranks paragraph chunks by keyword overlap—not embeddings. In **staff's post–review email** (not review day), they asked for a plain-language ↔ legal-term synonym map (e.g. "fired" → termination) in `relevance.js`, and to **surface retrieval failure** when the top chunks probably don't contain the answer.
+
+I kept lexical search because it is fast, debuggable, and matches the proposal's "no vector DB" architecture. The synonym map is a middle ground before embeddings. When overlap is weak or zero, the chat shows a yellow/red warning **before** the model answer so users know the excerpts may be wrong—not just an "unclear" flag buried after a confident paragraph.
+
+Multi-document **Compare** uses the same retrieval for each side, then asks the model for alignments, conflicts, and gaps. That was in my original proposal's "after first deliverable" list; staff's email asked me to actually ship it for the final submission.
+
+**Authorship:** Synonym terms and retrieval thresholds I picked from common lease/employment wording. Compare UI layout and the warning copy I wrote; API wiring and Firestore quota transactions were scaffolded with agent help and I tested on two sample contracts from `data/`.

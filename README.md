@@ -1,6 +1,8 @@
 # Unfold
 
-**Live demo:** https://unifold-ai.onrender.com — see **[DEMO.md](DEMO.md)** for access instructions.
+**Live demo:** [https://unifold-ai.onrender.com](https://unifold-ai.onrender.com) — see **[DEMO.md](DEMO.md)** for access instructions.
+
+Final Demo Video: [https://youtu.be/QrcSl5ZI47k](https://youtu.be/QrcSl5ZI47k)
 
 ## Project description
 
@@ -28,7 +30,7 @@ Uses npm **workspaces** (`client`, `server`).
 
 Analysis calls require an OpenAI-**compatible** HTTP API (this project uses env names aligned with a Triton-style host).
 
-1. Create a file named **`.env`** in the **project root** (same folder as the root `package.json`), **or** in **`server/`**.
+1. Create a file named `**.env`** in the **project root** (same folder as the root `package.json`), **or** in `**server/`**.
 2. Add:
 
 ```env
@@ -37,12 +39,15 @@ TRITON_API_KEY=your-secret-key-here
 TRITON_MODEL=your-model-name
 ```
 
-- **`TRITON_BASE_URL`** — Base URL for the API; the server trims slashes and ensures a `/v1` suffix for the OpenAI client.
-- **`TRITON_API_KEY`** — API key for that endpoint.
-- **`TRITON_MODEL`** — Model identifier sent to the chat API (if omitted, the server defaults to `gpt-oss-120b`).
-- **`PORT`** *(optional)* — Port for the Express API (default **8787**).
-- **`ANALYZE_DAILY_LIMIT`** *(optional)* — Max analyze requests per signed-in user per day (default **25**).
-- **`CHAT_DAILY_LIMIT`** *(optional)* — Max chat requests per signed-in user per day (default **80**).
+- `**TRITON_BASE_URL**` — Base URL for the API; the server trims slashes and ensures a `/v1` suffix for the OpenAI client.
+- `**TRITON_API_KEY**` — API key for that endpoint.
+- `**TRITON_MODEL**` — Model identifier sent to the chat API (if omitted, the server defaults to `gpt-oss-120b`).
+- `**PORT**` *(optional)* — Port for the Express API (default **8787**).
+- `**ANALYZE_DAILY_LIMIT`** *(optional)* — Max analyze requests per signed-in user per day (default **25**).
+- `**CHAT_DAILY_LIMIT`** *(optional)* — Max chat requests per signed-in user per day (default **80**).
+- `**COMPARE_DAILY_LIMIT`** *(optional)* — Max compare requests per signed-in user per day (default **15**).
+- `**FIREBASE_PROJECT_ID`** *(required for production auth + quotas)* — Same project ID as `VITE_FIREBASE_PROJECT_ID`.
+- `**FIREBASE_SERVICE_ACCOUNT_JSON`** *(required for production)* — Service account JSON (single line). Enables ID token verification and Firestore-backed daily limits in `server/rateLimit.js`.
 
 Without `TRITON_BASE_URL` and `TRITON_API_KEY`, `/api/analyze` and `/api/chat` return **503** (LLM not configured).
 
@@ -50,11 +55,11 @@ Without `TRITON_BASE_URL` and `TRITON_API_KEY`, `/api/analyze` and `/api/chat` r
 
 1. In the [Firebase Console](https://console.firebase.google.com/), create or select a project; enable **Authentication → Google** and create a **Firestore** database in production or test mode (then deploy `firestore.rules` from this repo).
 2. Register a **Web** app and copy the config object.
-3. Copy **`client/.env.example`** to **`client/.env`**.
-4. Fill in all **`VITE_FIREBASE_*`** variables from the Firebase snippet.
+3. Copy `**client/.env.example`** to `**client/.env*`*.
+4. Fill in all `**VITE_FIREBASE_***` variables from the Firebase snippet.
 5. Deploy Firestore rules when ready: `firebase deploy --only firestore:rules` (from repo root, with Firebase CLI logged in).
 
-Vite only exposes variables prefixed with **`VITE_`**. Restart the dev server after changing `client/.env`.
+Vite only exposes variables prefixed with `**VITE_**`. Restart the dev server after changing `client/.env`.
 
 ---
 
@@ -68,12 +73,14 @@ npm run dev
 
 This starts:
 
-| Process | Command (via workspaces) | Default URL |
-|--------|---------------------------|-------------|
-| React client (Vite) | `npm run dev -w client` | http://localhost:5173 |
-| Express API | `npm run dev -w server` | http://localhost:8787 |
 
-The Vite dev server **proxies** requests to **`/api/*`** to the API, so in development you open **http://localhost:5173** and use the app there; API calls go to `/api/health`, `/api/analyze`, and `/api/chat` on the same origin.
+| Process             | Command (via workspaces) | Default URL                                    |
+| ------------------- | ------------------------ | ---------------------------------------------- |
+| React client (Vite) | `npm run dev -w client`  | [http://localhost:5173](http://localhost:5173) |
+| Express API         | `npm run dev -w server`  | [http://localhost:8787](http://localhost:8787) |
+
+
+The Vite dev server **proxies** requests to `**/api/`*** to the API, so in development you open **[http://localhost:5173](http://localhost:5173)** and use the app there; API calls go to `/api/health`, `/api/analyze`, and `/api/chat` on the same origin.
 
 **Production build** (static frontend only):
 
@@ -81,25 +88,39 @@ The Vite dev server **proxies** requests to **`/api/*`** to the API, so in devel
 npm run build
 ```
 
-Output: **`client/dist/`**. For production, run **`npm start`** — the server serves **`client/dist/`** and the API on one port.
+Output: `**client/dist/**`. For production, run `**npm start**` — the server serves `**client/dist/**` and the API on one port.
 
 ---
 
 ## Demo video
 
-- **YouTube:** https://youtu.be/zYnco4uTTok
+- **YouTube:** [https://youtu.be/zYnco4uTTok](https://youtu.be/zYnco4uTTok)
+- Final Demo: [https://youtu.be/QrcSl5ZI47k](https://youtu.be/QrcSl5ZI47k)
 
 ---
 
 ## Initial submission documents (A4)
 
-| Document | Path |
-|----------|------|
-| Original proposal | [proposal/PROPOSAL.md](proposal/PROPOSAL.md) |
+
+| Document                                | Path                                                       |
+| --------------------------------------- | ---------------------------------------------------------- |
+| Original proposal                       | [proposal/PROPOSAL.md](proposal/PROPOSAL.md)               |
 | Marked proposal (implementation status) | [proposal/PROPOSAL_MARKED.md](proposal/PROPOSAL_MARKED.md) |
-| Demo access | [DEMO.md](DEMO.md) |
-| Design decisions + authorship | [DESIGN.md](DESIGN.md) |
-| Agent transcripts (×3) | [transcripts/](transcripts/) |
+| Demo access                             | [DEMO.md](DEMO.md)                                         |
+| Design decisions + authorship           | [DESIGN.md](DESIGN.md)                                     |
+| Agent transcripts (×3)                  | [transcripts/](transcripts/)                               |
+
+
+## Final submission documents (A4)
+
+
+| Document                       | Path                                                       |
+| ------------------------------ | ---------------------------------------------------------- |
+| Updated marked proposal        | [proposal/PROPOSAL_MARKED.md](proposal/PROPOSAL_MARKED.md) |
+| Review plan (feedback → fixes) | [REVIEW-PLAN.md](REVIEW-PLAN.md)                           |
+| Regrets + advice               | [REGRETS.md](REGRETS.md)                                   |
+| Final demo video               | [https://youtu.be/QrcSl5ZI47k](https://youtu.be/QrcSl5ZI47k) |
+
 
 ---
 
@@ -107,23 +128,29 @@ Output: **`client/dist/`**. For production, run **`npm start`** — the server s
 
 Each stage matches a part of the product; together they keep **trust** (local parsing), **quality** (structured LLM output), and **accountability** (signed-in saves) aligned with a small team or coursework scope.
 
-| Stage | What happens | Why this stage |
-|-------|----------------|----------------|
-| **1. Authentication** | User signs in with **Google** via Firebase; session gates the main app. | Ties saved analyses to an identity without building custom auth; enables per-user data in Firestore. |
-| **2. Ingest & extract** | User selects or drops **PDF** or **.txt**; text is read **in the browser** (PDF.js for PDFs). | Avoids uploading binary files to our server for parsing; only text is sent onward; clear privacy story. |
-| **3. Analyze** | Browser `POST`s text to **`/api/analyze`** (with `userId`); server chunks the text, calls the LLM, returns analysis + chunks; per-user daily limits apply. | Centralizes secrets (`TRITON_*`); chunks enable grounded chat without sending the full document every time. |
-| **4. Present & chat** | React shows summary, sections, risks, and questions; user asks follow-ups via **`/api/chat`** (top keyword-matched chunks + history). | Structured analysis plus interactive Q&A grounded in the upload. |
-| **5. Persist** | Each run (analysis, chunks, chat) is saved under **`users/{uid}/runs`** in **Firestore** when configured, else **localStorage**; users can delete runs from History. | Users can return to past work and continue chat; rules enforce one user’s data per subtree. |
+
+| Stage                       | What happens                                                                                                                                               | Why this stage                                                                                              |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **1. Authentication**       | User signs in with **Google** via Firebase; session gates the main app.                                                                                    | Ties saved analyses to an identity without building custom auth; enables per-user data in Firestore.        |
+| **2. Ingest & extract**     | User selects or drops **PDF** or **.txt**; text is read **in the browser** (PDF.js for PDFs).                                                              | Avoids uploading binary files to our server for parsing; only text is sent onward; clear privacy story.     |
+| **3. Analyze**              | Browser `POST`s text to `**/api/analyze`** (with `userId`); server chunks the text, calls the LLM, returns analysis + chunks; per-user daily limits apply. | Centralizes secrets (`TRITON_*`); chunks enable grounded chat without sending the full document every time. |
+| **4. Present & chat**       | React shows summary, sections, risks, and questions; user asks follow-ups via `**/api/chat`** (synonym-aware keyword chunks + retrieval warnings).         | Structured analysis plus interactive Q&A grounded in the upload.                                            |
+| **5. Compare** *(optional)* | User picks two saved runs on **Compare**; `**/api/compare`** retrieves excerpts from each and returns alignments, conflicts, gaps.                         | Cross-document checks (lease vs addendum).                                                                  |
+| **6. Persist**              | Each run saved under `**users/{uid}/runs`** in Firestore; daily usage under `**users/{uid}/usage`**.                                                       | Per-user isolation; quotas survive deploys.                                                                 |
+
 
 ---
 
 ## Repository layout
 
-| Path | Role |
-|------|------|
-| `client/` | React + TypeScript + Vite SPA |
-| `server/` | Express API (`/api/health`, `/api/analyze`, `/api/chat`, `/api/chunk`) |
-| `firestore.rules` | Firestore security rules (user-scoped data) |
-| `firebase.json` | Firebase CLI config (e.g. rules deployment) |
-| `DESIGN.md` | Design decisions and authorship reflection |
-| `ARCHITECTURE.md` | Deeper technical detail |
+
+| Path              | Role                                                                                   |
+| ----------------- | -------------------------------------------------------------------------------------- |
+| `client/`         | React + TypeScript + Vite SPA                                                          |
+| `server/`         | Express API (`/api/health`, `/api/analyze`, `/api/chat`, `/api/compare`, `/api/chunk`) |
+| `firestore.rules` | Firestore security rules (user-scoped data)                                            |
+| `firebase.json`   | Firebase CLI config (e.g. rules deployment)                                            |
+| `DESIGN.md`       | Design decisions and authorship reflection                                             |
+| `ARCHITECTURE.md` | Deeper technical detail                                                                |
+
+

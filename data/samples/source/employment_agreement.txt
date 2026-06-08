@@ -1,0 +1,73 @@
+This Employment Agreement ("Agreement") is made effective April 15, 2026, by Northline Analytics, Inc., a Delaware corporation with principal offices at 455 Market Street, 12th Floor, San Francisco, CA 94105 (the "Company"), and Jordan Ellis (the "Employee").
+
+## 1. Position and Duties
+
+The Company employs Employee as Senior Software Engineer, reporting to the VP of Engineering. Employee shall devote full business time and best efforts to performing duties customarily associated with the role, including designing, implementing, and reviewing production software; participating in on-call rotation; and mentoring junior engineers. Employee shall comply with Company policies, code of conduct, and information security standards as amended from time to time.
+
+## 2. Compensation
+
+Employee shall receive an annual base salary of One Hundred Forty-Five Thousand Dollars ($145,000.00), payable biweekly in accordance with Company payroll practices, subject to withholdings. Employee is eligible for an annual discretionary performance bonus with a target of fifteen percent (15%) of base salary, based on individual and Company metrics. Bonus payments are not guaranteed and do not constitute earned wages until paid.
+
+## 3. Equity
+
+Subject to Board approval, Employee shall be granted an option to purchase 12,000 shares of Common Stock under the Company's 2024 Equity Incentive Plan at fair market value on the grant date. Options vest over four (4) years with a one (1) year cliff: twenty-five percent (25%) on the first anniversary and the remainder in equal monthly installments thereafter, subject to continued service. Acceleration may apply only upon a qualifying change of control as defined in the Plan.
+
+## 4. Benefits and Time Off
+
+Employee is eligible for medical, dental, and vision coverage under Company group plans, with Company contributing eighty percent (80%) of employee-only premiums. Employee accrues paid time off ("PTO") at 1.67 days per month (twenty (20) days annually), capped at thirty (30) days. The Company observes ten (10) paid holidays. Sick leave is provided as required by California law and may run concurrently with PTO.
+
+## 5. At-Will Employment and Termination
+
+Employment is at-will. Either Party may terminate at any time, with or without cause or notice, subject to the severance provisions below. Upon termination for any reason, Employee shall return Company property, credentials, and confidential information. Final pay and accrued PTO shall be provided as required by law. The Company may place Employee on garden leave during any notice period.
+
+## 6. Severance
+
+If the Company terminates Employee without Cause (and not due to death or Disability), Employee shall receive severance equal to eight (8) weeks of base salary, payable as salary continuation, conditioned on signing a release of claims within twenty-one (21) days. Severance is not available if Employee is terminated for Cause, resigns voluntarily, or accepts employment with a competitor within twelve (12) months without written waiver.
+
+## 7. Confidentiality and IP Assignment
+
+Employee shall not disclose or use Confidential Information except for Company business during employment and shall return all materials upon departure. Employee assigns to the Company all inventions, code, documentation, and work product created during employment that relate to Company business or use Company resources, excluding inventions developed entirely on Employee's own time without Company equipment that do not relate to Company products or research.
+
+## 8. Non-Solicitation
+
+During employment and for twelve (12) months thereafter, Employee shall not solicit Company employees or contractors to leave the Company or solicit Company customers with whom Employee had material contact to purchase competing services. This restriction is limited to the geographic markets in which Employee worked during the final twelve (12) months of employment.
+
+## 9. Remote Work and Equipment
+
+Employee may work remotely up to three (3) days per week from within California with manager approval. The Company provides a laptop and monitor; Employee is responsible for secure home network practices. Employee agrees to install required endpoint protection and permit remote wipe if the device is lost.
+
+## 10. Performance Reviews
+
+Employee will receive a written performance review at least annually. Reviews may affect bonus eligibility and equity refresh grants but do not modify at-will status unless accompanied by a signed amendment.
+
+## 11. Expense Reimbursement
+
+The Company shall reimburse reasonable business expenses submitted within thirty (30) days with receipts, in accordance with the Company travel and expense policy. Pre-approval is required for expenses exceeding $500.
+
+## 12. Arbitration and Governing Law
+
+Except for injunctive relief for misuse of Confidential Information, disputes shall be resolved by binding arbitration in San Francisco under JAMS rules. The Agreement is governed by California law without regard to conflict-of-law principles. Class and representative actions are waived to the extent permitted by law.
+
+## 13. Background Checks and Policies
+
+Employee acknowledges that employment is contingent on satisfactory background verification and proof of work authorization. Employee shall complete mandatory harassment prevention and security awareness training within thirty (30) days of hire and annually thereafter.
+
+## 14. Outside Activities
+
+Employee may engage in outside teaching, open-source contributions, or advisory roles that do not conflict with Company business if disclosed in writing to HR. Employee shall not assist a direct competitor while employed without CEO approval.
+
+## 15. Export Controls and Trade Compliance
+
+Employee shall comply with U.S. export control laws and Company policies regarding access to controlled technology. Employee may not transfer Company source code or customer data to personal devices except through approved secure channels.
+
+## 16. Miscellaneous
+
+This Agreement supersedes prior oral or written understandings regarding employment terms. Amendments must be signed by both Parties. If any provision is unenforceable, it shall be modified to the minimum extent necessary. Electronic signatures are valid.
+
+SIG:
+COMPANY: Northline Analytics, Inc.
+By: ___________________________ Name: Priya Shah Title: CEO
+Date: April 15, 2026
+
+EMPLOYEE: ___________________________ Jordan Ellis
+Date: April 15, 2026
